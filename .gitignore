@@ -27,3 +27,4 @@ tmp/
 
 # test dirs and files
 test/
+file_*

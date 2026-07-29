@@ -38,18 +38,7 @@ void Carver::scan_image() {
       // inserts continuously and tries to match footer signature while extracting
       // if matched, closes file
       if (m_extracting && m_out_file.is_open()) {
-        m_out_file.put(stream_buffer[idx]);
-
-        if (match_signature(stream_buffer, m_active_sig->footer, idx, valid_bytes)) {
-          for (size_t footer_idx{ 1 }; footer_idx < m_active_sig->footer.size(); footer_idx++) {
-            m_out_file.put(stream_buffer[idx + footer_idx]);
-          }
-          idx += m_active_sig->footer.size() - 1;
-
-          m_out_file.close();
-          m_extracting = false;
-          m_active_sig = nullptr;
-        }
+        process_extraction(stream_buffer, idx, valid_bytes);
       }
     }
 

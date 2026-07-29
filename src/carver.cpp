@@ -114,6 +114,7 @@ void Carver::process_extraction(const std::vector<uint8_t>& buffer,
   if (match_signature(buffer, m_active_sig->footer, current_idx, valid_bytes)) {
     for (size_t footer_idx{ 1 }; footer_idx < m_active_sig->footer.size(); footer_idx++) {
       m_out_file.put(buffer[current_idx + footer_idx]);
+      EVP_DigestUpdate(m_sha256_ctx, &buffer[current_idx + footer_idx], 1);
     }
     current_idx += m_active_sig->footer.size() - 1;
 

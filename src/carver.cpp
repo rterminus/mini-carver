@@ -1,6 +1,7 @@
 #include "../include/carver.hpp"
 #include <cstdint>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -81,10 +82,14 @@ void Carver::check_for_header(const std::vector<uint8_t>& buffer,
       m_active_sig = &sig;
 
       // concatenates output file path + name
-      std::string filename = m_opts.output_path.string() + "/file_" + std::to_string(m_file_count)
-                             + m_active_sig->extension;
+      m_current_filename = m_opts.output_path.string() + "/file_" + std::to_string(m_file_count)
+                           + m_active_sig->extension;
 
-      m_out_file.open(filename, std::ios::binary);
+      m_out_file.open(m_current_filename, std::ios::binary);
+
+      std::cout << "[*] " << m_active_sig->extension << " file found on byte " << current_idx
+                << "\n";
+
       m_extracting = true;
       m_file_count++;
 
@@ -106,6 +111,9 @@ void Carver::process_extraction(const std::vector<uint8_t>& buffer,
     current_idx += m_active_sig->footer.size() - 1;
 
     m_out_file.close();
+
+    std::cout << "[+] File recovered and saved as " << m_current_filename << ".\n";
+
     m_extracting = false;
     m_active_sig = nullptr;
   }

@@ -17,6 +17,7 @@ private:
   RunningOpt m_opts;                             //!< opts received from cli
   std::ifstream m_stream;                        //!< disk reading stream
   std::ofstream m_out_file;                      //!< output file
+  std::string m_current_filename{ "" };          //!< current output file's name
   unsigned int m_file_count{ 0 };                //!< tracks outputed file count
   bool m_extracting{ false };                    //!< current state: searching/extracting
   const FileSignature* m_active_sig{ nullptr };  //!< active file signature if identified

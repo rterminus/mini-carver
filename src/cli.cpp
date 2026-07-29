@@ -1,5 +1,6 @@
 #include "../include/cli.hpp"
 #include <filesystem>
+#include <iostream>
 #include "../include/ui.hpp"
 
 RunningOpt parse_arguments(int argc, char* argv[]) {
@@ -58,13 +59,20 @@ void validate_arguments(std::filesystem::path target_image,
     }
   }
 
-  if (target_image != "" and std::filesystem::is_regular_file(target_image)) {
-    std::string file_extension{ std::filesystem::path(target_image).extension() };
+  if (target_image != "") {
+    if (std::filesystem::is_regular_file(target_image)) {
+      std::string file_extension{ std::filesystem::path(target_image).extension() };
 
-    if (is_supported_extension(file_extension)) {
+      if (is_supported_extension(file_extension)) {
+        opts.image_path = target_image;
+      } else {
+        print_error(ErrorType::UNSUPPORTED_EXTENSION, file_extension);
+      }
+    } else if (std::filesystem::is_block_file(target_image)) {
+      std::cout << "[*] Block device detected. Bypassing file extension check.\n";
       opts.image_path = target_image;
     } else {
-      print_error(ErrorType::UNSUPPORTED_EXTENSION, file_extension);
+      print_error(ErrorType::PATH_NOT_FOUND, target_image.string());
     }
   }
 }

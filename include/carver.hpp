@@ -1,7 +1,6 @@
 #ifndef CARVER_HPP
 #define CARVER_HPP
 
-#include <array>
 #include <cstdint>
 #include <fstream>
 #include <vector>
@@ -15,14 +14,16 @@ struct FileSignature {
 
 class Carver {
 private:
-  RunningOpt m_opts;                        //!< opts received from cli
-  std::ifstream m_stream;                   //!< disk reading stream
-  std::vector<FileSignature> m_signatures;  //!< supported file signatures
+  RunningOpt m_opts;                             //!< opts received from cli
+  std::ifstream m_stream;                        //!< disk reading stream
+  std::ofstream m_out_file;                      //!< output file
+  unsigned int m_file_count{ 0 };                //!< tracks outputed file count
+  bool m_extracting{ false };                    //!< current state: searching/extracting
+  const FileSignature* m_active_sig{ nullptr };  //!< active file signature if identified
+  std::vector<FileSignature> m_signatures;       //!< supported file signatures
 
-  static constexpr size_t CHUNK_SIZE = 4 * 1024 * 1024;  //!< 4MB
+  static constexpr size_t CHUNK_SIZE = 4 * 1024 * 1024;  //!< sizeof 4MB
   static constexpr size_t OVERLAP_SIZE = 16;  //!< bytes that will be copied to next iteration
-                                              // (sliding window)
-  static constexpr std::array<uint8_t, 2> JPEG_FOOTER = { 0xFF, 0xD9 };
 
 public:
   Carver(RunningOpt opts) : m_opts(opts) {
@@ -59,6 +60,26 @@ public:
                        const std::vector<uint8_t>& signatures,
                        size_t current_idx,
                        size_t valid_bytes);
+
+  /*!
+   * @brief Checks for header sequences in binary stream.
+   *
+   * @param buffer Current working binary buffer.
+   * @param current_idx Current working buffer index.
+   * @param valid_bytes Number of valid working bytes.
+   */
+  void check_for_header(const std::vector<uint8_t>& buffer, size_t current_idx, size_t valid_bytes);
+
+  /*!
+   * @brief Processes extractions, writing valid bytes to buffer.
+   *
+   * @param buffer Current working binary buffer.
+   * @param current_idx Current working buffer index.
+   * @param valid_bytes Number of valid working bytes.
+   */
+  void process_extraction(const std::vector<uint8_t>& buffer,
+                          size_t& current_idx,
+                          size_t valid_bytes);
 };
 
 #endif  // CARVER_HPP

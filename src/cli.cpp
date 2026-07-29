@@ -58,10 +58,6 @@ void validate_arguments(std::filesystem::path target_image,
     }
   }
 
-  if (target_output != "" and std::filesystem::is_directory(target_output)) {
-    opts.output_path = target_output;
-  }
-
   if (target_image != "" and std::filesystem::is_regular_file(target_image)) {
     std::string file_extension{ std::filesystem::path(target_image).extension() };
 

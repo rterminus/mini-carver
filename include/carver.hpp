@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <fstream>
+#include <openssl/evp.h>
 #include <vector>
 #include "./cli.hpp"
 
@@ -23,8 +24,10 @@ private:
   const FileSignature* m_active_sig{ nullptr };  //!< active file signature if identified
   std::vector<FileSignature> m_signatures;       //!< supported file signatures
 
+  EVP_MD_CTX* m_sha256_ctx{ nullptr };           //!< openssl context for sha-256 hashing
+
   static constexpr size_t CHUNK_SIZE = 4 * 1024 * 1024;  //!< sizeof 4MB
-  static constexpr size_t OVERLAP_SIZE = 16;  //!< bytes that will be copied to next iteration
+  static constexpr size_t OVERLAP_SIZE = 16;     //!< bytes that will be copied to next iteration
 
 public:
   Carver(RunningOpt opts) : m_opts(opts) {

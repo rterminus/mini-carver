@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <openssl/evp.h>
 #include <string>
 #include <vector>
 
@@ -93,6 +94,10 @@ void Carver::check_for_header(const std::vector<uint8_t>& buffer,
       m_extracting = true;
       m_file_count++;
 
+      // preparing hash context for file extraction
+      m_sha256_ctx = EVP_MD_CTX_new();
+      EVP_DigestInit_ex(m_sha256_ctx, EVP_sha256(), nullptr);
+
       break;
     }
   }
@@ -103,6 +108,8 @@ void Carver::process_extraction(const std::vector<uint8_t>& buffer,
                                 size_t valid_bytes) {
 
   m_out_file.put(buffer[current_idx]);
+  // updates hash context for newly added file content
+  EVP_DigestUpdate(m_sha256_ctx, &buffer[current_idx], 1);
 
   if (match_signature(buffer, m_active_sig->footer, current_idx, valid_bytes)) {
     for (size_t footer_idx{ 1 }; footer_idx < m_active_sig->footer.size(); footer_idx++) {
@@ -112,7 +119,29 @@ void Carver::process_extraction(const std::vector<uint8_t>& buffer,
 
     m_out_file.close();
 
+    // defines hash byte size
+    unsigned char hash_bytes[EVP_MAX_MD_SIZE];
+    unsigned int hash_len{ 0 };
+
+    // closes hash context
+    EVP_DigestFinal_ex(m_sha256_ctx, hash_bytes, &hash_len);
+    // basically a destructor to avoid memory leaking
+    // EVP_MD_CTX_new is the same as a new EVP_MD_CTX() for ex.
+    EVP_MD_CTX_free(m_sha256_ctx);
+
+    // preparing for hexadecimal conversion
+    std::string hash_string{ "" };
+    char hex_buffer[3];
+    // converting hash in binary to a hexadecimal string
+    // inserts converted bytes into a string stream with a buffer
+    // for safe insertion (up to 3 hex chars)
+    for (unsigned int idx{ 0 }; idx < hash_len; idx++) {
+      std::sprintf(hex_buffer, "%02x", hash_bytes[idx]);
+      hash_string += hex_buffer;
+    }
+
     std::cout << "[+] File recovered and saved as " << m_current_filename << ".\n";
+    std::cout << " | SHA-256: " << hash_string << "\n";
 
     m_extracting = false;
     m_active_sig = nullptr;

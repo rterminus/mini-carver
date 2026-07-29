@@ -24,3 +24,6 @@ tmp/
 *.pyc
 *.o
 *.so
+
+# test dirs and files
+test/

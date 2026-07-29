@@ -14,7 +14,7 @@ enum class ErrorType {
   MISSING_ARGUMENT,
   PATH_NOT_FOUND,
   UNSUPPORTED_EXTENSION,
-  NO_SUPPORTED_FILES
+  NO_SUPPORTED_FILE
 };
 
 /*!
@@ -29,14 +29,6 @@ void print_help();
  * @param optional Additional context for the error.
  */
 void print_error(ErrorType error, std::string optional = "");
-
-/*!
- * @brief Sorts the vector of FileInfo objects based on running options.
- *
- * @param file_info Reference to the vector of files to be sorted.
- * @param opts The parsed command-line options containing sorting preferences.
- */
-void sort_fileinfo(std::vector<FileInfo>& file_info, RunningOpt& opts);
 
 /*!
  * @brief Formats and prints the summary table.

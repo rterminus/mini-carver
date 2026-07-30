@@ -1,9 +1,9 @@
 ﻿# Mini Carver
 
-A lightweight, command-line data carving tool written in C++ for file recovery.
-Mini Carver scans raw disk images or binary dumps byte-by-byte, identifying file
-signatures (headers and footers) to extract lost artifacts without relying on a
-file system.
+A low-level, lightweight, command-line data carving tool written in C++ for file
+recovery. Mini Carver scans raw disk images, binary dumps or block devices
+byte-by-byte, identifying file signatures (headers and footers) to extract lost
+artifacts without relying on a file system.
 
 ## Features
 
@@ -24,7 +24,12 @@ file system.
 On Linux, ensure you have the base development tools and OpenSSL installed:
 
 ```bash
+# Arch
+sudo pacman -S base-devel cmake openssl
+
+# Ubuntu, Debian
 sudo apt install base-devel cmake openssl
+
 ```
 
 ## Build Instructions
@@ -39,13 +44,12 @@ cmake -S . -B build
 cmake --build build
 ```
 
-The compiled binary mini-carver will be located in the build/ directory.
+The compiled binary `mini-carver` will be located in the `build/` directory.
 
 ## Usage
 
 ```bash
 mini-carver [OPTIONS] <target_image>
-
 ```
 
 ### Options
@@ -60,13 +64,19 @@ Scan a raw disk image and extract files to the current directory:
 
 ```bash
 ./build/mini-carver foobar.raw
-
 ```
 
-Scan a disk dump and save all recovered artifacts to a specific evidence folder:
+Scan a disk dump and save all recovered artifacts to a specific folder:
 
 ```bash
 ./build/mini-carver -o /home/user/foo bar.dd
+```
+
+Scan a block device:
+
+```bash
+# sudo is needed to access block device content on Linux
+sudo ./build/mini-carver /dev/sda
 ```
 
 ## Technical Notes
